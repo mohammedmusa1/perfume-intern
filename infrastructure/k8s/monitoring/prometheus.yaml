@@ -1,0 +1,101 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      - job_name: 'auraperfume-services'
+        static_configs:
+          - targets:
+              - 'api-gateway.auraperfume:3000'
+              - 'auth-service.auraperfume:3001'
+              - 'product-service.auraperfume:3002'
+              - 'cart-service.auraperfume:3003'
+              - 'order-service.auraperfume:3004'
+              - 'payment-service.auraperfume:3005'
+              - 'coupon-service.auraperfume:3006'
+              - 'notification-service.auraperfume:3007'
+              - 'admin-service.auraperfume:3008'
+        metrics_path: /metrics
+
+      - job_name: 'autoops-agents'
+        static_configs:
+          - targets:
+              - 'agent-codegen.autoops:8001'
+              - 'agent-docker-monitor.autoops:8002'
+              - 'agent-k8s.autoops:8003'
+              - 'agent-ci-cd.autoops:8004'
+              - 'agent-observability.autoops:8005'
+              - 'agent-security.autoops:8006'
+              - 'agent-cloud.autoops:8007'
+              - 'agent-rollback.autoops:8008'
+              - 'agent-notifier.autoops:8009'
+        metrics_path: /metrics
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:latest
+          ports:
+            - containerPort: 9090
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml"
+            - "--storage.tsdb.path=/prometheus"
+            - "--web.enable-lifecycle"
+          volumeMounts:
+            - name: prometheus-config
+              mountPath: /etc/prometheus
+            - name: prometheus-storage
+              mountPath: /prometheus
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "200m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      volumes:
+        - name: prometheus-config
+          configMap:
+            name: prometheus-config
+        - name: prometheus-storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  selector:
+    app: prometheus
+  ports:
+    - port: 9090
+      targetPort: 9090
+      nodePort: 30090
+  type: NodePort

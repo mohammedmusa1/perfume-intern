@@ -1,134 +1,257 @@
-# 🌟 AuraPerfume — Luxury Perfume E-Commerce Platform
+# 🌹 AuraPerfume — Autonomous E-Commerce Platform
 
-A production-ready, microservices-based perfume e-commerce platform built with modern scalable architecture.
+A production-grade, self-healing microservices platform with autonomous DevOps agents, Kubernetes orchestration, GitOps via ArgoCD, and full observability.
 
-## 🏗️ Architecture
-
-```
-Frontend (Next.js) → API Gateway → Microservices → PostgreSQL
-                                  ├── Auth Service
-                                  ├── Product Service
-                                  ├── Cart Service
-                                  ├── Order Service
-                                  ├── Payment Service (Razorpay)
-                                  ├── Coupon Service
-                                  ├── Notification Service (Resend)
-                                  └── Admin Service
-```
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Next.js 15, React, TypeScript, Tailwind CSS |
-| Backend | Node.js, Express, TypeScript (strict) |
-| Database | PostgreSQL 16 |
-| Payments | Razorpay (UPI, Cards, Net Banking) |
-| Email | Resend |
-| Containers | Docker, Docker Compose |
-| Orchestration | Kubernetes |
-| GitOps | ArgoCD |
-| IaC | Terraform (AWS + GCP) |
-| CI/CD | GitHub Actions |
-| Monitoring | Prometheus + Grafana |
-| Security | JWT, bcrypt, Helmet, rate limiting, RBAC |
-
-## 🚀 Quick Start (Local Development)
-
-### Prerequisites
-- Node.js 20+
-- PostgreSQL 16+ (or Docker)
-
-### 1. Clone and setup environment
-```bash
-cp .env.example .env
-# Edit .env with your database credentials, Razorpay keys, Resend API key
-```
-
-### 2. Start the frontend
-```bash
-cd frontend
-npm install
-npm run dev
-# Opens at http://localhost:3000
-```
-
-### 3. Start backend services
-```bash
-# In separate terminals:
-cd services/auth-service && npm install && npm run dev
-cd services/product-service && npm install && npm run dev
-cd services/cart-service && npm install && npm run dev
-cd services/order-service && npm install && npm run dev
-cd services/payment-service && npm install && npm run dev
-cd services/coupon-service && npm install && npm run dev
-cd services/notification-service && npm install && npm run dev
-cd services/admin-service && npm install && npm run dev
-cd services/api-gateway && npm install && npm run dev
-```
-
-### 4. Run database migrations
-```bash
-psql -U auraperfume_user -d auraperfume -f database/migrations/001_initial_schema.sql
-psql -U auraperfume_user -d auraperfume -f database/seeds/001_seed_data.sql
-```
-
-## 🐳 Docker Compose (Recommended)
-```bash
-cp .env.example .env
-docker-compose up --build
-```
-- Frontend: http://localhost:4000
-- API Gateway: http://localhost:3000
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3100 (admin/admin)
-
-## ☁️ AWS Deployment
-```bash
-cd infrastructure/terraform/aws
-terraform init
-terraform plan
-terraform apply
-```
-
-## ☁️ GCP Migration
-```bash
-cd infrastructure/terraform/gcp
-terraform init
-terraform plan
-terraform apply
-```
+---
 
 ## 📁 Project Structure
+
 ```
-├── frontend/              # Next.js frontend
-├── services/
-│   ├── api-gateway/       # Request routing, rate limiting
-│   ├── auth-service/      # JWT auth, signup, login
-│   ├── product-service/   # Perfume CRUD, search, reviews
-│   ├── cart-service/      # Shopping cart
-│   ├── order-service/     # Orders, checkout
-│   ├── payment-service/   # Razorpay integration
-│   ├── coupon-service/    # Coupon CRUD, apply, tracking
-│   ├── notification-service/ # Resend emails
-│   └── admin-service/     # Dashboard, analytics
-├── packages/shared/       # Shared types, validators
-├── database/              # Migrations, seeds
+D:\perfume
+├── agents/                    # 9 AutoOps autonomous agents
+├── frontend/                  # Next.js e-commerce frontend
+├── services/                  # 9 microservices
+│   ├── api-gateway
+│   ├── auth-service
+│   ├── product-service
+│   ├── cart-service
+│   ├── order-service
+│   ├── payment-service
+│   ├── coupon-service
+│   ├── notification-service
+│   └── admin-service
+├── database/                  # SQL migrations + seeds
 ├── infrastructure/
-│   ├── kubernetes/        # K8s manifests
-│   ├── terraform/aws/     # AWS infrastructure
-│   ├── terraform/gcp/     # GCP infrastructure
-│   ├── argocd/            # GitOps config
-│   └── monitoring/        # Prometheus + Grafana
-├── .github/workflows/     # CI/CD pipelines
-├── docker-compose.yml
-└── .env.example
+│   ├── k8s/                   # All Kubernetes manifests
+│   │   ├── namespaces.yaml
+│   │   ├── auraperfume/       # E-commerce services
+│   │   ├── monitoring/        # Prometheus + Grafana
+│   │   ├── autoops/           # AutoOps agents
+│   │   └── cicd/              # Jenkins + ArgoCD
+│   ├── monitoring/
+│   └── terraform/             # AWS + GCP IaC
+├── .github/workflows/         # GitHub Actions CI/CD
+├── docker-compose.yml         # Local Docker stack
+└── scripts/k8s-deploy.sh      # One-shot K8s deploy
 ```
 
-## 🔐 Default Credentials
-- Admin: admin@auraperfume.com / Admin@123456
-- Customer: customer@example.com / Customer@123
-- Coupons: WELCOME20, FLAT500, LUXURY15
+---
 
-## 📄 License
-MIT
+## 🚀 Quick Start
+
+### Docker (Local)
+
+```bash
+cd D:\perfume
+docker compose up -d --build
+docker compose ps
+```
+
+### Kubernetes
+
+```bash
+# Deploy everything
+bash scripts/k8s-deploy.sh
+
+# Or manually
+kubectl apply -f infrastructure/k8s/namespaces.yaml
+kubectl apply -f infrastructure/k8s/auraperfume/
+kubectl apply -f infrastructure/k8s/monitoring/
+kubectl apply -f infrastructure/k8s/autoops/
+kubectl apply -f infrastructure/k8s/cicd/
+
+# Verify
+kubectl get pods -A
+```
+
+---
+
+## 🌐 Service URLs
+
+### Docker Stack (local)
+
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:4000 |
+| API Gateway | http://localhost:3000 |
+| Grafana | http://localhost:3100 |
+| Prometheus | http://localhost:9090 |
+| Notifier (manual report) | `curl -X POST http://localhost:8009/report/send` |
+
+### Kubernetes Stack
+
+| Service | URL |
+|---|---|
+| Frontend | http://localhost |
+| API Gateway | http://localhost/api |
+| Prometheus | http://localhost:9090 (NodePort 30090) |
+| Grafana | http://localhost:3100 (NodePort 31000) |
+| Jenkins | http://localhost:8080 (NodePort 30080) |
+| ArgoCD | https://localhost:8081 (NodePort 30081) |
+
+---
+
+## 🤖 AutoOps Agents
+
+| Agent | Port | Responsibility |
+|---|---|---|
+| codegen | 8001 | Generate/update configs |
+| docker-monitor | 8002 | Monitor & restart unhealthy containers |
+| k8s | 8003 | Watch pods, auto-recreate CrashLoopBackOff |
+| ci-cd | 8004 | Monitor GitHub Actions & Jenkins builds |
+| observability | 8005 | Collect Prometheus target metrics |
+| security | 8006 | Scan service security headers |
+| cloud | 8007 | AWS + GCP infrastructure health |
+| rollback | 8008 | `kubectl rollout undo` on failure |
+| notifier | 8009 | 12-hour email reports via SMTP |
+
+### Agent Endpoints
+
+```bash
+# Health check
+curl http://localhost:<port>/health
+
+# Metrics (Prometheus format)
+curl http://localhost:<port>/metrics
+
+# Execute agent task
+curl -X POST http://localhost:<port>/execute
+
+# Send email report now
+curl -X POST http://localhost:8009/report/send
+```
+
+---
+
+## 🔧 Jenkins
+
+### Access
+
+```
+URL: http://localhost:8080
+User: admin
+Pass: admin123
+```
+
+### Pipeline
+
+The Jenkinsfile builds Docker images on push, pushes to Docker Hub, and triggers ArgoCD sync.
+
+---
+
+## 🔄 ArgoCD
+
+### Install (if not via deploy script)
+
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl patch svc argocd-server -n argocd -p '{"spec":{"type":"NodePort"}}'
+```
+
+### Access
+
+```bash
+# Get initial password
+kubectl -n argocd get secret argocd-initial-admin-secret \
+  -o jsonpath="{.data.password}" | base64 -d
+
+# Port forward (alternative)
+kubectl port-forward svc/argocd-server -n argocd 8081:443
+```
+
+URL: https://localhost:8081  
+User: `admin`
+
+### GitOps Sync
+
+ArgoCD automatically syncs changes pushed to `main` branch at `infrastructure/k8s/`.
+
+---
+
+## 📊 Monitoring
+
+### Prometheus
+
+URL: http://localhost:9090
+
+Scrapes all services and agents every 15 seconds.
+
+### Grafana
+
+URL: http://localhost:3100  
+Credentials: `admin` / `admin`
+
+**Dashboards:**
+- Pod health and restart counts
+- Container CPU / RAM usage
+- Service request rates
+- Agent execution metrics
+
+---
+
+## 🔒 Secrets
+
+Secrets are managed via:
+- **Local**: `.env` file (never committed)
+- **Kubernetes**: `kubectl create secret` or `infrastructure/k8s/*/secrets.yaml`
+- **GitHub Actions**: Repository Secrets (`DOCKER_USERNAME`, `DOCKER_PASSWORD`, `ARGOCD_SERVER`, `ARGOCD_TOKEN`)
+
+---
+
+## 🏗️ CI/CD Pipeline
+
+```
+Push to main
+    │
+    ▼
+GitHub Actions (.github/workflows/ci-cd.yml)
+    │
+    ├─ Build all 19 Docker images (parallel matrix)
+    ├─ Push to Docker Hub (mohammedmusa1/perfume-*)
+    └─ Trigger ArgoCD sync
+           │
+           ▼
+    ArgoCD applies infrastructure/k8s/
+           │
+           ▼
+    Kubernetes cluster updated
+           │
+           ▼
+    AutoOps agents monitor health
+```
+
+---
+
+## 📧 Email Reports
+
+The notifier agent sends a 12-hour infrastructure report automatically.
+
+Manual trigger:
+```bash
+curl -X POST http://localhost:8009/report/send
+# or in Kubernetes:
+curl -X POST http://agent-notifier.autoops:8009/report/send
+```
+
+---
+
+## 🗄️ Database
+
+PostgreSQL 16 with migrations auto-applied on startup.
+
+```bash
+# Connect locally
+psql -h localhost -p 5433 -U auraperfume_user -d auraperfume
+
+# Connect in Kubernetes
+kubectl exec -it deployment/postgres -n auraperfume -- \
+  psql -U auraperfume_user -d auraperfume
+```
+
+---
+
+## 📦 GitHub Repository
+
+**URL:** https://github.com/mohammedmusa1/perfume-intern  
+**Branch:** main

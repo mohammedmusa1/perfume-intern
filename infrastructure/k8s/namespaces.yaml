@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: auraperfume
+  labels:
+    app.kubernetes.io/part-of: auraperfume
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    app.kubernetes.io/part-of: auraperfume
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: autoops
+  labels:
+    app.kubernetes.io/part-of: auraperfume
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cicd
+  labels:
+    app.kubernetes.io/part-of: auraperfume

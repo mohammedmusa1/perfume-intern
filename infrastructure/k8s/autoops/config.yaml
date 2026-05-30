@@ -1,0 +1,28 @@
+---
+# AutoOps secrets (GitHub token, SMTP, etc.)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: autoops-secrets
+  namespace: autoops
+type: Opaque
+stringData:
+  GITHUB_TOKEN: ""
+  SMTP_USER: "shaikhmusa991@gmail.com"
+  SMTP_PASS: "ztmn tjml eako bwva"
+  REPORT_EMAIL: "shaikhmusa991@gmail.com"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: autoops-config
+  namespace: autoops
+data:
+  GITHUB_REPO: "mohammedmusa1/perfume-intern"
+  K8S_NAMESPACE: "auraperfume"
+  AWS_REGION: "us-east-1"
+  GCP_PROJECT: "auraperfume-prod"
+  PROMETHEUS_URL: "http://prometheus.monitoring:9090"
+  SMTP_HOST: "smtp.gmail.com"
+  SMTP_PORT: "587"
+  NODE_ENV: "production"

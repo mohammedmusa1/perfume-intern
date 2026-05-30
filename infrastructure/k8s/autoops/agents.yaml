@@ -1,0 +1,554 @@
+---
+# ── codegen agent ────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-codegen
+  namespace: autoops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-codegen
+  template:
+    metadata:
+      labels:
+        app: agent-codegen
+    spec:
+      containers:
+        - name: agent-codegen
+          image: mohammedmusa1/perfume-agent-codegen:latest
+          ports:
+            - containerPort: 8001
+          env:
+            - name: PORT
+              value: "8001"
+          envFrom:
+            - configMapRef:
+                name: autoops-config
+            - secretRef:
+                name: autoops-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-codegen
+  namespace: autoops
+spec:
+  selector:
+    app: agent-codegen
+  ports:
+    - port: 8001
+      targetPort: 8001
+  type: ClusterIP
+---
+# ── docker-monitor agent ─────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-docker-monitor
+  namespace: autoops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-docker-monitor
+  template:
+    metadata:
+      labels:
+        app: agent-docker-monitor
+    spec:
+      containers:
+        - name: agent-docker-monitor
+          image: mohammedmusa1/perfume-agent-docker-monitor:latest
+          ports:
+            - containerPort: 8002
+          env:
+            - name: PORT
+              value: "8002"
+          envFrom:
+            - configMapRef:
+                name: autoops-config
+            - secretRef:
+                name: autoops-secrets
+          volumeMounts:
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8002
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+      volumes:
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-docker-monitor
+  namespace: autoops
+spec:
+  selector:
+    app: agent-docker-monitor
+  ports:
+    - port: 8002
+      targetPort: 8002
+  type: ClusterIP
+---
+# ── k8s agent ────────────────────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: autoops-k8s-sa
+  namespace: autoops
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: autoops-k8s-role
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services", "endpoints"]
+    verbs: ["get", "list", "watch", "delete"]
+  - apiGroups: ["apps"]
+    resources: ["deployments", "replicasets"]
+    verbs: ["get", "list", "watch", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: autoops-k8s-rolebinding
+subjects:
+  - kind: ServiceAccount
+    name: autoops-k8s-sa
+    namespace: autoops
+roleRef:
+  kind: ClusterRole
+  name: autoops-k8s-role
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-k8s
+  namespace: autoops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-k8s
+  template:
+    metadata:
+      labels:
+        app: agent-k8s
+    spec:
+      serviceAccountName: autoops-k8s-sa
+      containers:
+        - name: agent-k8s
+          image: mohammedmusa1/perfume-agent-k8s:latest
+          ports:
+            - containerPort: 8003
+          env:
+            - name: PORT
+              value: "8003"
+          envFrom:
+            - configMapRef:
+                name: autoops-config
+            - secretRef:
+                name: autoops-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8003
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-k8s
+  namespace: autoops
+spec:
+  selector:
+    app: agent-k8s
+  ports:
+    - port: 8003
+      targetPort: 8003
+  type: ClusterIP
+---
+# ── ci-cd agent ──────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-ci-cd
+  namespace: autoops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-ci-cd
+  template:
+    metadata:
+      labels:
+        app: agent-ci-cd
+    spec:
+      containers:
+        - name: agent-ci-cd
+          image: mohammedmusa1/perfume-agent-ci-cd:latest
+          ports:
+            - containerPort: 8004
+          env:
+            - name: PORT
+              value: "8004"
+          envFrom:
+            - configMapRef:
+                name: autoops-config
+            - secretRef:
+                name: autoops-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8004
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-ci-cd
+  namespace: autoops
+spec:
+  selector:
+    app: agent-ci-cd
+  ports:
+    - port: 8004
+      targetPort: 8004
+  type: ClusterIP
+---
+# ── observability agent ──────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-observability
+  namespace: autoops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-observability
+  template:
+    metadata:
+      labels:
+        app: agent-observability
+    spec:
+      containers:
+        - name: agent-observability
+          image: mohammedmusa1/perfume-agent-observability:latest
+          ports:
+            - containerPort: 8005
+          env:
+            - name: PORT
+              value: "8005"
+          envFrom:
+            - configMapRef:
+                name: autoops-config
+            - secretRef:
+                name: autoops-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-observability
+  namespace: autoops
+spec:
+  selector:
+    app: agent-observability
+  ports:
+    - port: 8005
+      targetPort: 8005
+  type: ClusterIP
+---
+# ── security agent ───────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-security
+  namespace: autoops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-security
+  template:
+    metadata:
+      labels:
+        app: agent-security
+    spec:
+      containers:
+        - name: agent-security
+          image: mohammedmusa1/perfume-agent-security:latest
+          ports:
+            - containerPort: 8006
+          env:
+            - name: PORT
+              value: "8006"
+            - name: API_GATEWAY_URL
+              value: "http://api-gateway.auraperfume:3000"
+            - name: AUTH_SERVICE_URL
+              value: "http://auth-service.auraperfume:3001"
+            - name: PRODUCT_SERVICE_URL
+              value: "http://product-service.auraperfume:3002"
+            - name: CART_SERVICE_URL
+              value: "http://cart-service.auraperfume:3003"
+            - name: ORDER_SERVICE_URL
+              value: "http://order-service.auraperfume:3004"
+          envFrom:
+            - configMapRef:
+                name: autoops-config
+            - secretRef:
+                name: autoops-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8006
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-security
+  namespace: autoops
+spec:
+  selector:
+    app: agent-security
+  ports:
+    - port: 8006
+      targetPort: 8006
+  type: ClusterIP
+---
+# ── cloud agent ──────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-cloud
+  namespace: autoops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-cloud
+  template:
+    metadata:
+      labels:
+        app: agent-cloud
+    spec:
+      containers:
+        - name: agent-cloud
+          image: mohammedmusa1/perfume-agent-cloud:latest
+          ports:
+            - containerPort: 8007
+          env:
+            - name: PORT
+              value: "8007"
+          envFrom:
+            - configMapRef:
+                name: autoops-config
+            - secretRef:
+                name: autoops-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8007
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-cloud
+  namespace: autoops
+spec:
+  selector:
+    app: agent-cloud
+  ports:
+    - port: 8007
+      targetPort: 8007
+  type: ClusterIP
+---
+# ── rollback agent ───────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-rollback
+  namespace: autoops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-rollback
+  template:
+    metadata:
+      labels:
+        app: agent-rollback
+    spec:
+      serviceAccountName: autoops-k8s-sa
+      containers:
+        - name: agent-rollback
+          image: mohammedmusa1/perfume-agent-rollback:latest
+          ports:
+            - containerPort: 8008
+          env:
+            - name: PORT
+              value: "8008"
+          envFrom:
+            - configMapRef:
+                name: autoops-config
+            - secretRef:
+                name: autoops-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8008
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-rollback
+  namespace: autoops
+spec:
+  selector:
+    app: agent-rollback
+  ports:
+    - port: 8008
+      targetPort: 8008
+  type: ClusterIP
+---
+# ── notifier agent ───────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-notifier
+  namespace: autoops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-notifier
+  template:
+    metadata:
+      labels:
+        app: agent-notifier
+    spec:
+      containers:
+        - name: agent-notifier
+          image: mohammedmusa1/perfume-agent-notifier:latest
+          ports:
+            - containerPort: 8009
+          env:
+            - name: PORT
+              value: "8009"
+          envFrom:
+            - configMapRef:
+                name: autoops-config
+            - secretRef:
+                name: autoops-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8009
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-notifier
+  namespace: autoops
+spec:
+  selector:
+    app: agent-notifier
+  ports:
+    - port: 8009
+      targetPort: 8009
+  type: ClusterIP

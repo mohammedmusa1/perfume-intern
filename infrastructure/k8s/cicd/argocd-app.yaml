@@ -1,0 +1,25 @@
+---
+# ArgoCD Application pointing to this repo
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: auraperfume
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/mohammedmusa1/perfume-intern.git
+    targetRevision: main
+    path: infrastructure/k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: auraperfume
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true

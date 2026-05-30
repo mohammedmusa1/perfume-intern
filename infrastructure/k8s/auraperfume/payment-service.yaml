@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: auraperfume
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+        - name: payment-service
+          image: mohammedmusa1/perfume-payment-service:latest
+          ports:
+            - containerPort: 3005
+          envFrom:
+            - configMapRef:
+                name: auraperfume-config
+            - secretRef:
+                name: auraperfume-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3005
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: auraperfume
+spec:
+  selector:
+    app: payment-service
+  ports:
+    - port: 3005
+      targetPort: 3005
+  type: ClusterIP

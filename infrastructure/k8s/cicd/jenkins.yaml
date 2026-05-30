@@ -1,0 +1,118 @@
+---
+# Jenkins PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-pvc
+  namespace: cicd
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+# Jenkins admin secret
+apiVersion: v1
+kind: Secret
+metadata:
+  name: jenkins-secret
+  namespace: cicd
+type: Opaque
+stringData:
+  jenkins-admin-password: "admin123"
+  jenkins-admin-user: "admin"
+---
+# Jenkins Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins
+  namespace: cicd
+  labels:
+    app: jenkins
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins
+  template:
+    metadata:
+      labels:
+        app: jenkins
+    spec:
+      securityContext:
+        fsGroup: 1000
+        runAsUser: 1000
+      initContainers:
+        - name: init-jenkins
+          image: busybox
+          command: ["sh", "-c", "chown -R 1000:1000 /var/jenkins_home"]
+          volumeMounts:
+            - name: jenkins-storage
+              mountPath: /var/jenkins_home
+          securityContext:
+            runAsUser: 0
+      containers:
+        - name: jenkins
+          image: jenkins/jenkins:lts-jdk17
+          ports:
+            - containerPort: 8080
+              name: http
+            - containerPort: 50000
+              name: agent
+          env:
+            - name: JENKINS_OPTS
+              value: "--prefix=/jenkins"
+            - name: JAVA_OPTS
+              value: "-Xmx1024m -Dhudson.model.DownloadService.noSignatureCheck=true"
+          volumeMounts:
+            - name: jenkins-storage
+              mountPath: /var/jenkins_home
+            - name: docker-sock
+              mountPath: /var/run/docker.sock
+          readinessProbe:
+            httpGet:
+              path: /jenkins/login
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /jenkins/login
+              port: 8080
+            initialDelaySeconds: 120
+            periodSeconds: 20
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1500m"
+      volumes:
+        - name: jenkins-storage
+          persistentVolumeClaim:
+            claimName: jenkins-pvc
+        - name: docker-sock
+          hostPath:
+            path: /var/run/docker.sock
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+  namespace: cicd
+spec:
+  selector:
+    app: jenkins
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      nodePort: 30080
+    - name: agent
+      port: 50000
+      targetPort: 50000
+  type: NodePort
