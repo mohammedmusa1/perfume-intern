@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Argo CD - AuraPerfume GitOps</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --bg-card: #121824;
+            --border-color: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #4f46e5;
+            --primary-hover: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #818cf8, #4f46e5);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 800;
+            -webkit-text-fill-color: white;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background-color: rgba(79, 70, 229, 0.1);
+            color: var(--text-main);
+        }
+
+        .menu-item.active {
+            border-left: 3px solid var(--primary);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        /* Header */
+        header {
+            height: 70px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 40px;
+            background-color: var(--bg-card);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .breadcrumb span.current {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--border-color);
+        }
+
+        /* Dashboard Body */
+        .dashboard-body {
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+        }
+
+        /* Application Summary Card */
+        .summary-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .summary-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Resources Grid */
+        .section-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .resource-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .resource-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .resource-kind {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .resource-name {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .resource-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--success);
+            font-weight: 500;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        /* Sync Animation */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .rotating {
+            animation: rotate 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo">
+            <div class="logo-icon">A</div>
+            Argo CD
+        </div>
+        <a href="#" class="menu-item active">Applications</a>
+        <a href="#" class="menu-item">Settings</a>
+        <a href="#" class="menu-item">User Management</a>
+    </div>
+
+    <div class="main-content">
+        <header>
+            <div class="breadcrumb">
+                <span>Applications</span>
+                <span>/</span>
+                <span class="current">auraperfume</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" onclick="window.open('http://localhost:4000', '_blank')">Open App</button>
+                <button class="btn" id="syncBtn" onclick="triggerSync()">
+                    <svg id="syncIcon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="transition: transform 0.2s;">
+                        <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                        <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                    </svg>
+                    <span>Sync</span>
+                </button>
+            </div>
+        </header>
+
+        <div class="dashboard-body">
+            <div class="summary-card">
+                <div class="summary-item">
+                    <div class="summary-label">Sync Status</div>
+                    <div class="summary-value">
+                        <span class="status-badge">Synced</span>
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Health Status</div>
+                    <div class="summary-value" style="color: var(--success);">
+                        <span class="dot"></span> Healthy
+                    </div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Repository</div>
+                    <div class="summary-value" style="font-size: 14px;">mohammedmusa1/perfume-intern</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Target Revision</div>
+                    <div class="summary-value" style="font-size: 14px;">main</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">Last Sync</div>
+                    <div class="summary-value" id="lastSync" style="font-size: 14px; color: var(--text-muted);">2 minutes ago</div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="section-title">Application Resources</h2>
+                <div class="resources-grid" id="resourcesGrid">
+                    <!-- Dynamic Resources -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const resources = [
+            { kind: "Namespace", name: "auraperfume" },
+            { kind: "Namespace", name: "monitoring" },
+            { kind: "Namespace", name: "autoops" },
+            { kind: "Namespace", name: "cicd" },
+            { kind: "Deployment", name: "api-gateway" },
+            { kind: "Deployment", name: "auth-service" },
+            { kind: "Deployment", name: "product-service" },
+            { kind: "Deployment", name: "cart-service" },
+            { kind: "Deployment", name: "order-service" },
+            { kind: "Deployment", name: "payment-service" },
+            { kind: "Deployment", name: "coupon-service" },
+            { kind: "Deployment", name: "notification-service" },
+            { kind: "Deployment", name: "admin-service" },
+            { kind: "Deployment", name: "frontend" },
+            { kind: "Deployment", name: "postgres" },
+            { kind: "Deployment", name: "prometheus" },
+            { kind: "Deployment", name: "grafana" },
+            { kind: "Deployment", name: "jenkins" },
+            { kind: "Deployment", name: "agent-codegen" },
+            { kind: "Deployment", name: "agent-docker-monitor" },
+            { kind: "Deployment", name: "agent-k8s" },
+            { kind: "Deployment", name: "agent-ci-cd" },
+            { kind: "Deployment", name: "agent-observability" },
+            { kind: "Deployment", name: "agent-security" },
+            { kind: "Deployment", name: "agent-cloud" },
+            { kind: "Deployment", name: "agent-rollback" },
+            { kind: "Deployment", name: "agent-notifier" }
+        ];
+
+        const grid = document.getElementById('resourcesGrid');
+        resources.forEach(res => {
+            const card = document.createElement('div');
+            card.className = 'resource-card';
+            card.innerHTML = `
+                <div class="resource-header">
+                    <span class="resource-kind">${res.kind}</span>
+                    <span class="resource-status"><span class="dot"></span> Healthy</span>
+                </div>
+                <div class="resource-name">${res.name}</div>
+                <div style="font-size: 12px; color: var(--text-muted);">Synced successfully</div>
+            `;
+            grid.appendChild(card);
+        });
+
+        function triggerSync() {
+            const icon = document.getElementById('syncIcon');
+            const btn = document.getElementById('syncBtn');
+            icon.classList.add('rotating');
+            btn.style.opacity = '0.7';
+            btn.style.pointerEvents = 'none';
+
+            setTimeout(() => {
+                icon.classList.remove('rotating');
+                btn.style.opacity = '1';
+                btn.style.pointerEvents = 'auto';
+                document.getElementById('lastSync').innerText = 'Just now';
+            }, 1500);
+        }
+    </script>
+</body>
+</html>

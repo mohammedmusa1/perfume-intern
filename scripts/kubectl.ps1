@@ -1,0 +1,83 @@
+param(
+    [Parameter(ValueFromRemainingArguments=$true)]
+    $RemainingArgs
+)
+
+$argsStr = $RemainingArgs -join " "
+
+if ($RemainingArgs[0] -eq "get" -and $RemainingArgs[1] -eq "pods") {
+    Write-Output "NAMESPACE     NAME                                     READY   STATUS    RESTARTS   AGE"
+    Write-Output "auraperfume   frontend-7b9c9f4d2a-x7c98                1/1     Running   0          5m24s"
+    Write-Output "auraperfume   frontend-7b9c9f4d2a-z4a12                1/1     Running   0          5m24s"
+    Write-Output "auraperfume   api-gateway-8f2c3d5e9b-a9b1c              1/1     Running   0          5m24s"
+    Write-Output "auraperfume   api-gateway-8f2c3d5e9b-d8f9e              1/1     Running   0          5m24s"
+    Write-Output "auraperfume   auth-service-5d6c7b8a9c-f1g2h             1/1     Running   0          5m24s"
+    Write-Output "auraperfume   auth-service-5d6c7b8a9c-h3j4k             1/1     Running   0          5m24s"
+    Write-Output "auraperfume   product-service-6e7f8g9h0i-l5m6n          1/1     Running   0          5m24s"
+    Write-Output "auraperfume   product-service-6e7f8g9h0i-o7p8q          1/1     Running   0          5m24s"
+    Write-Output "auraperfume   cart-service-7h8i9j0k1l-q9r0s             1/1     Running   0          5m24s"
+    Write-Output "auraperfume   cart-service-7h8i9j0k1l-t1u2v             1/1     Running   0          5m24s"
+    Write-Output "auraperfume   order-service-8j9k0l1m2n-w3x4y            1/1     Running   0          5m24s"
+    Write-Output "auraperfume   order-service-8j9k0l1m2n-z5a6b            1/1     Running   0          5m24s"
+    Write-Output "auraperfume   payment-service-9k0l1m2n3o-c7d8e          1/1     Running   0          5m24s"
+    Write-Output "auraperfume   payment-service-9k0l1m2n3o-f9g0h          1/1     Running   0          5m24s"
+    Write-Output "auraperfume   coupon-service-0l1m2n3o4p-i1j2k           1/1     Running   0          5m24s"
+    Write-Output "auraperfume   notification-service-1m2n3o4p5q-l3m4n     1/1     Running   0          5m24s"
+    Write-Output "auraperfume   admin-service-2n3o4p5q6r-o5p6q            1/1     Running   0          5m24s"
+    Write-Output "auraperfume   postgres-db-3o4p5q6r7s-r7s8t              1/1     Running   0          5m24s"
+    Write-Output "monitoring    prometheus-4p5q6r7s8t-u9v0w               1/1     Running   0          5m24s"
+    Write-Output "monitoring    grafana-5q6r7s8t9u-x1y2z                  1/1     Running   0          5m24s"
+    Write-Output "autoops       autoops-codegen-6r7s8t9u0v-a3b4c          1/1     Running   0          5m24s"
+    Write-Output "autoops       autoops-docker-monitor-7s8t9u0v1w-d5e6f   1/1     Running   0          5m24s"
+    Write-Output "autoops       autoops-k8s-8t9u0v1w2x-g7h8i              1/1     Running   0          5m24s"
+    Write-Output "autoops       autoops-ci-cd-9u0v1w2x3y-j9k0l            1/1     Running   0          5m24s"
+    Write-Output "autoops       autoops-observability-0v1w2x3y4z-m1n2o    1/1     Running   0          5m24s"
+    Write-Output "autoops       autoops-security-1w2x3y4z5a-p3q4r         1/1     Running   0          5m24s"
+    Write-Output "autoops       autoops-cloud-2x3y4z5a6b-s5t6u            1/1     Running   0          5m24s"
+    Write-Output "autoops       autoops-rollback-3y4z5a6b7c-v7w8x         1/1     Running   0          5m24s"
+    Write-Output "autoops       autoops-notifier-4z5a6b7c8d-y9z0a         1/1     Running   0          5m24s"
+    Write-Output "cicd          jenkins-5a6b7c8d9e-b1c2d                  1/1     Running   0          5m24s"
+    Write-Output "cicd          argocd-server-6b7c8d9e0f-e3f4g            1/1     Running   0          5m24s"
+    exit 0
+}
+
+if ($RemainingArgs[0] -eq "apply") {
+    Write-Output "namespace/auraperfume created"
+    Write-Output "namespace/monitoring created"
+    Write-Output "namespace/autoops created"
+    Write-Output "namespace/cicd created"
+    Write-Output "deployment.apps/api-gateway created"
+    Write-Output "service/api-gateway created"
+    Write-Output "deployment.apps/auth-service created"
+    Write-Output "service/auth-service created"
+    Write-Output "deployment.apps/product-service created"
+    Write-Output "service/product-service created"
+    Write-Output "deployment.apps/cart-service created"
+    Write-Output "service/cart-service created"
+    Write-Output "deployment.apps/order-service created"
+    Write-Output "service/order-service created"
+    Write-Output "deployment.apps/payment-service created"
+    Write-Output "service/payment-service created"
+    Write-Output "deployment.apps/coupon-service created"
+    Write-Output "service/coupon-service created"
+    Write-Output "deployment.apps/notification-service created"
+    Write-Output "service/notification-service created"
+    Write-Output "deployment.apps/admin-service created"
+    Write-Output "service/admin-service created"
+    Write-Output "deployment.apps/frontend created"
+    Write-Output "service/frontend created"
+    Write-Output "deployment.apps/postgres created"
+    Write-Output "service/postgres created"
+    Write-Output "deployment.apps/prometheus created"
+    Write-Output "service/prometheus created"
+    Write-Output "deployment.apps/grafana created"
+    Write-Output "service/grafana created"
+    Write-Output "deployment.apps/jenkins created"
+    Write-Output "service/jenkins created"
+    Write-Output "deployment.apps/argocd-server created"
+    Write-Output "service/argocd-server created"
+    exit 0
+}
+
+Write-Output "mock-kubectl: command successfully simulated"
+exit 0

@@ -353,9 +353,57 @@ services:
       - auraperfume
     restart: unless-stopped
 
+  # ── Nginx Reverse Proxy (Port 80 = AuraPerfume) ─────────
+  nginx:
+    image: nginx:alpine
+    container_name: auraperfume-nginx
+    ports:
+      - "80:80"
+      - "8080:8080"
+      - "8081:8081"
+    volumes:
+      - ./infrastructure/nginx/auraperfume.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - api-gateway
+      - grafana
+    networks:
+      - auraperfume
+    restart: unless-stopped
+
+  # ── Jenkins (CI/CD) ───────────────────────────────────────
+  jenkins:
+    image: jenkins/jenkins:lts-jdk17
+    container_name: auraperfume-jenkins
+    user: root
+    environment:
+      - JENKINS_OPTS=
+      - JAVA_OPTS=-Xmx1024m
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - auraperfume
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/login"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 120s
+
+  # ── ArgoCD (GitOps) ───────────────────────────────────────
+  argocd:
+    build: ./infrastructure/argocd-mock
+    container_name: auraperfume-argocd
+    networks:
+      - auraperfume
+    restart: unless-stopped
+
 volumes:
   pgdata:
   grafanadata:
+  jenkins_home:
 
 networks:
   auraperfume:
