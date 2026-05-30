@@ -1,0 +1,37 @@
+{
+  "dashboard": {
+    "title": "AuraPerfume Microservices",
+    "panels": [
+      {
+        "title": "Request Rate (per service)",
+        "type": "graph",
+        "targets": [{ "expr": "rate(http_requests_total[5m])", "legendFormat": "{{job}}" }]
+      },
+      {
+        "title": "Response Time (p95)",
+        "type": "graph",
+        "targets": [{ "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m]))", "legendFormat": "{{job}}" }]
+      },
+      {
+        "title": "Error Rate",
+        "type": "graph",
+        "targets": [{ "expr": "rate(http_requests_total{status=~\"5..\"}[5m])", "legendFormat": "{{job}}" }]
+      },
+      {
+        "title": "Active Connections",
+        "type": "stat",
+        "targets": [{ "expr": "nodejs_active_handles_total", "legendFormat": "{{job}}" }]
+      },
+      {
+        "title": "Memory Usage",
+        "type": "graph",
+        "targets": [{ "expr": "process_resident_memory_bytes", "legendFormat": "{{job}}" }]
+      },
+      {
+        "title": "CPU Usage",
+        "type": "graph",
+        "targets": [{ "expr": "rate(process_cpu_seconds_total[5m])", "legendFormat": "{{job}}" }]
+      }
+    ]
+  }
+}

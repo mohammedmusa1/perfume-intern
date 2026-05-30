@@ -1,0 +1,362 @@
+services:
+  # ── Database ──────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: auraperfume-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./database/migrations/001_initial_schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./database/seeds/001_seed_data.sql:/docker-entrypoint-initdb.d/02-seed.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - auraperfume
+
+  # ── API Gateway ───────────────────────────────────────
+  api-gateway:
+    build: ./services/api-gateway
+    container_name: auraperfume-gateway
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - CART_SERVICE_URL=http://cart-service:3003
+      - ORDER_SERVICE_URL=http://order-service:3004
+      - PAYMENT_SERVICE_URL=http://payment-service:3005
+      - COUPON_SERVICE_URL=http://coupon-service:3006
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3007
+      - ADMIN_SERVICE_URL=http://admin-service:3008
+    depends_on:
+      - auth-service
+      - product-service
+      - cart-service
+      - order-service
+      - payment-service
+      - coupon-service
+      - notification-service
+      - admin-service
+    networks:
+      - auraperfume
+
+  # ── Auth Service ──────────────────────────────────────
+  auth-service:
+    build: ./services/auth-service
+    container_name: auraperfume-auth
+    ports:
+      - "3001:3001"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3007
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auraperfume
+
+  # ── Product Service ───────────────────────────────────
+  product-service:
+    build: ./services/product-service
+    container_name: auraperfume-products
+    ports:
+      - "3002:3002"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auraperfume
+
+  # ── Cart Service ──────────────────────────────────────
+  cart-service:
+    build: ./services/cart-service
+    container_name: auraperfume-cart
+    ports:
+      - "3003:3003"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auraperfume
+
+  # ── Order Service ─────────────────────────────────────
+  order-service:
+    build: ./services/order-service
+    container_name: auraperfume-orders
+    ports:
+      - "3004:3004"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auraperfume
+
+  # ── Payment Service ───────────────────────────────────
+  payment-service:
+    build: ./services/payment-service
+    container_name: auraperfume-payments
+    ports:
+      - "3005:3005"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auraperfume
+
+  # ── Coupon Service ────────────────────────────────────
+  coupon-service:
+    build: ./services/coupon-service
+    container_name: auraperfume-coupons
+    ports:
+      - "3006:3006"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auraperfume
+
+  # ── Notification Service ──────────────────────────────
+  notification-service:
+    build: ./services/notification-service
+    container_name: auraperfume-notifications
+    ports:
+      - "3007:3007"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auraperfume
+
+  # ── Admin Service ─────────────────────────────────────
+  admin-service:
+    build: ./services/admin-service
+    container_name: auraperfume-admin
+    ports:
+      - "3008:3008"
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auraperfume
+
+  # ── Frontend ──────────────────────────────────────────
+  frontend:
+    build: ./frontend
+    container_name: auraperfume-frontend
+    ports:
+      - "4000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3000/api
+    depends_on:
+      - api-gateway
+    networks:
+      - auraperfume
+
+  # ── Prometheus ────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: auraperfume-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - auraperfume
+
+  # ── Grafana ───────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:latest
+    container_name: auraperfume-grafana
+    ports:
+      - "3100:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafanadata:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - auraperfume
+
+  # ══════════════════════════════════════════════════════
+  # ── AutoOps Agents ────────────────────────────────────
+  # ══════════════════════════════════════════════════════
+
+  # ── Codegen Agent ─────────────────────────────────────
+  agent-codegen:
+    build: ./agents/codegen
+    container_name: autoops-codegen
+    ports:
+      - "8001:8001"
+    env_file: .env
+    environment:
+      - PORT=8001
+    networks:
+      - auraperfume
+    restart: unless-stopped
+
+  # ── Docker Monitor Agent ──────────────────────────────
+  agent-docker-monitor:
+    build: ./agents/docker-monitor
+    container_name: autoops-docker-monitor
+    ports:
+      - "8002:8002"
+    env_file: .env
+    environment:
+      - PORT=8002
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - auraperfume
+    restart: unless-stopped
+
+  # ── K8s Agent ─────────────────────────────────────────
+  agent-k8s:
+    build: ./agents/k8s
+    container_name: autoops-k8s
+    ports:
+      - "8003:8003"
+    env_file: .env
+    environment:
+      - PORT=8003
+      - K8S_NAMESPACE=${K8S_NAMESPACE}
+    networks:
+      - auraperfume
+    restart: unless-stopped
+
+  # ── CI/CD Agent ───────────────────────────────────────
+  agent-ci-cd:
+    build: ./agents/ci-cd
+    container_name: autoops-ci-cd
+    ports:
+      - "8004:8004"
+    env_file: .env
+    environment:
+      - PORT=8004
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_REPO=${GITHUB_REPO}
+    networks:
+      - auraperfume
+    restart: unless-stopped
+
+  # ── Observability Agent ───────────────────────────────
+  agent-observability:
+    build: ./agents/observability
+    container_name: autoops-observability
+    ports:
+      - "8005:8005"
+    env_file: .env
+    environment:
+      - PORT=8005
+      - PROMETHEUS_URL=http://prometheus:9090
+    depends_on:
+      - prometheus
+    networks:
+      - auraperfume
+    restart: unless-stopped
+
+  # ── Security Agent ────────────────────────────────────
+  agent-security:
+    build: ./agents/security
+    container_name: autoops-security
+    ports:
+      - "8006:8006"
+    env_file: .env
+    environment:
+      - PORT=8006
+      - API_GATEWAY_URL=http://api-gateway:3000
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - PRODUCT_SERVICE_URL=http://product-service:3002
+      - CART_SERVICE_URL=http://cart-service:3003
+      - ORDER_SERVICE_URL=http://order-service:3004
+    networks:
+      - auraperfume
+    restart: unless-stopped
+
+  # ── Cloud Agent ───────────────────────────────────────
+  agent-cloud:
+    build: ./agents/cloud
+    container_name: autoops-cloud
+    ports:
+      - "8007:8007"
+    env_file: .env
+    environment:
+      - PORT=8007
+      - AWS_REGION=${AWS_REGION}
+      - GCP_PROJECT=${GCP_PROJECT}
+    networks:
+      - auraperfume
+    restart: unless-stopped
+
+  # ── Rollback Agent ────────────────────────────────────
+  agent-rollback:
+    build: ./agents/rollback
+    container_name: autoops-rollback
+    ports:
+      - "8008:8008"
+    env_file: .env
+    environment:
+      - PORT=8008
+    networks:
+      - auraperfume
+    restart: unless-stopped
+
+  # ── Notifier Agent ────────────────────────────────────
+  agent-notifier:
+    build: ./agents/notifier
+    container_name: autoops-notifier
+    ports:
+      - "8009:8009"
+    env_file: .env
+    environment:
+      - PORT=8009
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - REPORT_EMAIL=${REPORT_EMAIL}
+      - PROMETHEUS_URL=http://prometheus:9090
+    depends_on:
+      - prometheus
+    networks:
+      - auraperfume
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  grafanadata:
+
+networks:
+  auraperfume:
+    driver: bridge
