@@ -1,7 +1,6 @@
 controller:
-  service:
-    type: NodePort
-    nodePort: 30081
+  serviceType: NodePort
+  nodePort: 30081
   persistence:
     enabled: true
     size: "10Gi"
