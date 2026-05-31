@@ -6,11 +6,11 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/your-org/auraperfume.git
+    repoURL: 'https://github.com/mohammedmusa1/perfume-intern.git'
     targetRevision: main
-    path: infrastructure/kubernetes/base
+    path: infrastructure/k8s
   destination:
-    server: https://kubernetes.default.svc
+    server: 'https://kubernetes.default.svc'
     namespace: auraperfume
   syncPolicy:
     automated:
@@ -18,10 +18,3 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
-      - PrunePropagationPolicy=foreground
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        maxDuration: 3m0s
-        factor: 2
