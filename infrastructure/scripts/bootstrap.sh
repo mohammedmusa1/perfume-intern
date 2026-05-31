@@ -55,7 +55,7 @@ helm repo update
 # 8. Install ArgoCD
 helm upgrade --install argocd argo/argo-cd -n argocd \
   --set server.service.type=NodePort \
-  --set server.service.nodePorts.http=32382
+  --set server.service.nodePortHttp=32382
 
 # 9. Apply ArgoCD Application Manifest
 curl -sL https://raw.githubusercontent.com/mohammedmusa1/perfume-intern/main/infrastructure/argocd/application.yaml | kubectl apply -f - || true
@@ -65,7 +65,7 @@ curl -sL https://raw.githubusercontent.com/mohammedmusa1/perfume-intern/main/inf
 helm upgrade --install jenkins jenkins/jenkins -n jenkins -f /tmp/jenkins-values.yaml
 
 kubectl rollout status \
- deployment/jenkins \
+ statefulset/jenkins \
  -n jenkins \
  --timeout=600s
 

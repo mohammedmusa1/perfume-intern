@@ -33,11 +33,6 @@ controller:
     - workflow-aggregator
     - blueocean
     - credentials-binding
-  podSecurityContextOverride:
-    runAsUser: 0
-  containerSecurityContext:
-    runAsUser: 0
-    runAsGroup: 0
   additionalVolumes:
     - name: docker-sock
       hostPath:
