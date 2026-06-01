@@ -14,9 +14,13 @@ if (!globalStore.__otpStore) {
   globalStore.__otpStore = new Map();
 }
 
-const JWT_SECRET = process.env.JWT_SECRET || 'aura-perfume-jwt-secret-change-in-production-2024';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'aura-perfume-refresh-secret-change-in-production-2024';
+function requireEnv(name: string, value: string | undefined): string {
+  if (!value) throw new Error(`${name} environment variable is required`);
+  return value;
+}
 
+const JWT_SECRET = requireEnv('JWT_SECRET', process.env.JWT_SECRET);
+const JWT_REFRESH_SECRET = requireEnv('JWT_REFRESH_SECRET', process.env.JWT_REFRESH_SECRET);
 export async function POST(req: NextRequest) {
   try {
     const { email, otp } = await req.json();
