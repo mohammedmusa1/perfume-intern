@@ -1,7 +1,6 @@
 'use client';
 import { useState } from 'react';
 import { formatPrice } from '@/lib/api';
-import { use } from 'react';
 
 const perfumeData: Record<string, { id: string; name: string; brand: string; price: number; sale_price: number | null; category: string; fragrance_family: string; description: string; top_notes: string[]; middle_notes: string[]; base_notes: string[]; size_ml: number; images: string[]; thumbnail: string; average_rating: number; total_reviews: number }> = {
   'royal-oud-noir': { id: '1', name: 'Royal Oud Noir', brand: 'AuraPerfume', price: 4999, sale_price: 3999, category: 'men', fragrance_family: 'oud', description: 'A majestic blend of rare oud, smoky incense, and rich amber. This opulent fragrance embodies royalty with deep woody layers and a warm, lingering trail that commands attention. Crafted from the finest ingredients sourced across the globe.', top_notes: ['Bergamot', 'Saffron', 'Pink Pepper'], middle_notes: ['Oud', 'Rose', 'Incense'], base_notes: ['Amber', 'Sandalwood', 'Musk'], size_ml: 100, images: ['https://images.unsplash.com/photo-1594035910387-fea081ac05b2?w=800'], thumbnail: 'https://images.unsplash.com/photo-1594035910387-fea081ac05b2?w=800', average_rating: 4.8, total_reviews: 124 },
@@ -11,9 +10,11 @@ const perfumeData: Record<string, { id: string; name: string; brand: string; pri
 // Fallback for unknown slugs
 const defaultPerfume = { id: '1', name: 'Royal Oud Noir', brand: 'AuraPerfume', price: 4999, sale_price: 3999, category: 'men', fragrance_family: 'oud', description: 'A majestic blend of rare oud, smoky incense, and rich amber.', top_notes: ['Bergamot', 'Saffron'], middle_notes: ['Oud', 'Rose'], base_notes: ['Amber', 'Musk'], size_ml: 100, images: ['https://images.unsplash.com/photo-1594035910387-fea081ac05b2?w=800'], thumbnail: 'https://images.unsplash.com/photo-1594035910387-fea081ac05b2?w=800', average_rating: 4.8, total_reviews: 124 };
 
-export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params);
+export default function ProductDetailPage({ params }: { params: { slug: string } }) {
+  const { slug } = params;
   const perfume = perfumeData[slug] || defaultPerfume;
+  const [qty, setQty] = useState(1);
+  const [addedToCart, setAddedToCart] = useState(false);
   const [qty, setQty] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
 
