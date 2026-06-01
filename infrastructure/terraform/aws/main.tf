@@ -32,7 +32,7 @@ resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
   enable_dns_support   = true
-  tags = { Name = "${var.project_name}-vpc" }
+  tags                 = { Name = "${var.project_name}-vpc" }
 }
 
 resource "aws_subnet" "public_a" {
@@ -40,7 +40,7 @@ resource "aws_subnet" "public_a" {
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "${var.aws_region}a"
   map_public_ip_on_launch = true
-  tags = { Name = "${var.project_name}-public-a" }
+  tags                    = { Name = "${var.project_name}-public-a" }
 }
 
 resource "aws_subnet" "public_b" {
@@ -48,7 +48,7 @@ resource "aws_subnet" "public_b" {
   cidr_block              = "10.0.2.0/24"
   availability_zone       = "${var.aws_region}b"
   map_public_ip_on_launch = true
-  tags = { Name = "${var.project_name}-public-b" }
+  tags                    = { Name = "${var.project_name}-public-b" }
 }
 
 resource "aws_internet_gateway" "igw" {
