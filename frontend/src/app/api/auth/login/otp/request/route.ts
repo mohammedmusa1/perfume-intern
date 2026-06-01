@@ -7,7 +7,7 @@ const globalStore = globalThis as unknown as { __otpStore?: Map<string, { code: 
 if (!globalStore.__otpStore) {
   globalStore.__otpStore = new Map();
 }
-const otpStore = globalStore.__otpStore;
+const otpStore = globalStore.__otpStore!;
 
 // Email template for OTP
 function otpEmailHtml(name: string, code: string): string {
