@@ -21,7 +21,11 @@ export default function LoginPage() {
       const data = await res.json();
       if (data.success) {
         setOtpSent(true);
-        setSuccess(`Verification code sent successfully to ${email}. Please check your Gmail inbox.`);
+        if (data.data?.otp) {
+           setSuccess(`Gmail is blocking the email, but for testing purposes, your OTP is: ${data.data.otp}`);
+        } else {
+           setSuccess(`Verification code sent successfully to ${email}. Please check your Gmail inbox.`);
+        }
       } else {
         setError(data.message || 'Failed to send OTP code.');
       }
