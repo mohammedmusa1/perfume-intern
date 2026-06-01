@@ -4,9 +4,13 @@ import jwt from 'jsonwebtoken';
 
 // In-memory user store for Vercel serverless (stateless between cold starts)
 // For production, replace with a database like Supabase, PlanetScale, Neon, etc.
-const JWT_SECRET = process.env.JWT_SECRET || 'aura-perfume-jwt-secret-change-in-production-2024';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'aura-perfume-refresh-secret-change-in-production-2024';
+function requireEnv(name: string, value: string | undefined): string {
+  if (!value) throw new Error(`${name} environment variable is required`);
+  return value;
+}
 
+const JWT_SECRET = requireEnv('JWT_SECRET', process.env.JWT_SECRET);
+const JWT_REFRESH_SECRET = requireEnv('JWT_REFRESH_SECRET', process.env.JWT_REFRESH_SECRET);
 // Simple bcrypt-like hash using crypto (avoids native dependency issues on Vercel)
 function hashPassword(password: string): string {
   const salt = crypto.randomBytes(16).toString('hex');
