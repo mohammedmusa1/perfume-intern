@@ -1,0 +1,41 @@
+controller:
+  serviceType: NodePort
+  nodePort: 30081
+  persistence:
+    enabled: true
+    size: "10Gi"
+    accessMode: "ReadWriteOnce"
+  resources:
+    requests:
+      cpu: "1"
+      memory: "1Gi"
+    limits:
+      cpu: "2"
+      memory: "2Gi"
+  probes:
+    startupProbe:
+      failureThreshold: 12
+      periodSeconds: 10
+      timeoutSeconds: 5
+    livenessProbe:
+      failureThreshold: 5
+      periodSeconds: 10
+      timeoutSeconds: 5
+    readinessProbe:
+      failureThreshold: 3
+      periodSeconds: 10
+      timeoutSeconds: 5
+  installPlugins:
+    - kubernetes
+    - git
+    - docker-workflow
+    - workflow-aggregator
+    - blueocean
+    - credentials-binding
+  additionalVolumes:
+    - name: docker-sock
+      hostPath:
+        path: /var/run/docker.sock
+  additionalVolumeMounts:
+    - name: docker-sock
+      mountPath: /var/run/docker.sock
