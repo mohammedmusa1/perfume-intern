@@ -92,18 +92,16 @@ export async function POST(req: NextRequest) {
       console.warn('[OTP] No Gmail SMTP configured. OTP:', otp);
     }
 
+    if (!emailSent) {
+      return NextResponse.json({
+        success: false,
+        message: 'Failed to send OTP email: ' + (emailErrorMsg || 'SMTP credentials missing'),
+      }, { status: 500 });
+    }
+
     return NextResponse.json({
       success: true,
-      message: emailSent
-        ? 'OTP verification code sent successfully to your Gmail'
-        : 'OTP generated (Email service offline — check server logs for OTP)',
-      data: {
-        // In production, NEVER return the OTP in the response.
-        // This is included for development/testing convenience.
-        ...(process.env.NODE_ENV !== 'production' ? { otp } : {}),
-        emailSent,
-        error: emailErrorMsg || undefined,
-      },
+      message: 'OTP verification code sent successfully to your Gmail',
     });
   } catch (err) {
     console.error('OTP request error:', err);
