@@ -15,8 +15,6 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
   const perfume = perfumeData[slug] || defaultPerfume;
   const [qty, setQty] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
-  const [qty, setQty] = useState(1);
-  const [addedToCart, setAddedToCart] = useState(false);
 
   const handleAddToCart = () => {
     setAddedToCart(true);
