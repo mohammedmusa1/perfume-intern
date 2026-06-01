@@ -1,7 +1,11 @@
 #!/bin/bash
 set -euo pipefail
-EC2_IP="13.235.51.146"
+EC2_IP="${EC2_IP:-${1:-}}"
 
+if [[ -z "${EC2_IP}" ]]; then
+  echo "EC2_IP must be provided via the EC2_IP env var or as the first argument" >&2
+  exit 1
+fi
 echo "============================================================"
 echo " AuraPerfume - k3s Bootstrap & Full Deployment"
 echo " Target: ubuntu@${EC2_IP}"
